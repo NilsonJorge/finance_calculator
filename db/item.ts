@@ -1,4 +1,15 @@
-import { db } from "@/db";
+import { db } from "@/db/db";
+
+export type Item = {
+  name: string;
+  initialValue: number;
+  initialDate: string;
+  finalDate: string;
+  differenceDates: number;
+  percentage: number;
+  period: string;
+  finalValue: number;
+};
 
 // Criar
 export async function addItem(
@@ -29,13 +40,20 @@ export async function addItem(
 }
 
 // Ler todos
-export async function getAllItems() {
-  return await db.getAllAsync(`SELECT * FROM item`);
+export async function getAllInvestimentItems(id: number) {
+  const result = await db.getAllAsync(
+    `SELECT * FROM item WHERE investment_id=?`,
+    [id]
+  );
+  return result as Item[];
 }
 
 // Ler um pelo ID
 export async function getItemById(id: number) {
-  return await db.getFirstAsync(`SELECT * FROM item WHERE id = ?`, [id]);
+  const result = await db.getFirstAsync(`SELECT * FROM item WHERE id = ?`, [
+    id,
+  ]);
+  return result ? (result as Item) : null;
 }
 
 // Atualizar

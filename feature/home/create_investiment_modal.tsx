@@ -10,9 +10,15 @@ import {
   ModalBody,
   ModalFooter,
 } from "@/components/ui/modal";
+import { addInvestment, getAllInvestments } from "@/db/investiment";
+
+import { addInvestimentInput, addInvestimentSchema } from "@/db/schema";
+import { zodResolver } from "@hookform/resolvers/zod";
 
 import React, { useState } from "react";
+import { useForm } from "react-hook-form";
 import { View, Text } from "react-native";
+import { useInvestments } from "./investiments_context";
 
 type CreateInvestimentProps = {
   className?: string;
@@ -21,7 +27,31 @@ type CreateInvestimentProps = {
 export default function CreateInvestiment({
   className,
 }: CreateInvestimentProps) {
+  const { createInvestment } = useInvestments();
   const [showModal, setShowModal] = useState(false);
+
+  const {
+    handleSubmit,
+    reset,
+    setValue,
+    formState: { errors },
+  } = useForm<addInvestimentInput>({
+    resolver: zodResolver(addInvestimentSchema),
+    defaultValues: {
+      name: "",
+      totalValue: 0,
+    },
+  });
+
+  const closeModal = () => {
+    setShowModal(false);
+    reset();
+  };
+
+  async function submit(data: addInvestimentInput) {
+    createInvestment(data.name, data.totalValue);
+    closeModal();
+  }
   return (
     <View className={className}>
       <Button action="positive" onPress={() => setShowModal(true)}>
@@ -30,12 +60,7 @@ export default function CreateInvestiment({
         </View>
       </Button>
 
-      <Modal
-        isOpen={showModal}
-        onClose={() => {
-          setShowModal(false);
-        }}
-      >
+      <Modal isOpen={showModal} onClose={closeModal}>
         <ModalBackdrop />
         <ModalContent>
           <ModalHeader>
@@ -52,14 +77,17 @@ export default function CreateInvestiment({
               isInvalid={false}
               isReadOnly={false}
             >
-              <InputField placeholder="Nome do investimento" />
+              <InputField
+                onChangeText={(text) => setValue("name", text)}
+                placeholder="Nome do investimento"
+              />
             </Input>
           </ModalBody>
           <ModalFooter className="justify-between">
-            <Button action="negative" onPress={() => setShowModal(false)}>
+            <Button action="negative" onPress={closeModal}>
               <ButtonText>Cancelar</ButtonText>
             </Button>
-            <Button action="positive" onPress={() => setShowModal(true)}>
+            <Button action="positive" onPress={handleSubmit(submit)}>
               <ButtonText>Criar</ButtonText>
             </Button>
           </ModalFooter>

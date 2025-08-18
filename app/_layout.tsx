@@ -10,7 +10,9 @@ import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function RootLayout() {
   useEffect(() => {
-    initDB();
+    initDB().then(() => {
+      console.log("Banco inicializado!");
+    });
   }, []);
   return (
     <GluestackUIProvider>
